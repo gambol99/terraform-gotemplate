@@ -85,22 +85,23 @@ func renderGoTemplate(d *schema.ResourceData) (string, error) {
 		return "", err
 	}
 	// step: load any snippits if required
+	var files []string
 	if snippetsPath != "" {
 		// build a list of files under the directory
-		var files []string
-		dfiles, err := ioutil.ReadDir(snippetsPath)
+		list, err := ioutil.ReadDir(snippetsPath)
 		if err != nil {
 			return "", err
 		}
-		for _, x := range dfiles {
-			files = append(files, fmt.Sprintf("%s/%s", strings.TrimRight(snippetsPath, "/"), x.Name()))
+		trimmed := strings.TrimRight(snippetsPath, "/")
+		for _, x := range list {
+			files = append(files, fmt.Sprintf("%s/%s", trimmed, x.Name()))
 		}
 
 		// step: parse the snippit files and add to the template
 		if len(files) > 0 {
 			tmpl, err = tmpl.ParseFiles(files...)
 			if err != nil {
-				return "", err
+				return "", fmt.Errorf("failed to parse snippets at: %s, error: %s", snippetsPath, err)
 			}
 		}
 	}
@@ -108,7 +109,7 @@ func renderGoTemplate(d *schema.ResourceData) (string, error) {
 	// step: render the template
 	rendered := new(bytes.Buffer)
 	if err := tmpl.ExecuteTemplate(rendered, "main", vars); err != nil {
-		return "", err
+		return "", fmt.Errorf("unable to generate content, snippets: %d, error: %s", len(tmpl.Templates()), ",", err)
 	}
 
 	return rendered.String(), nil
