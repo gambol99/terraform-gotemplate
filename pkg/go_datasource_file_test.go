@@ -39,7 +39,6 @@ func TestGoTemplate(t *testing.T) {
 		Content  string
 		Vars     string
 		Expected string
-		Snippits []string
 	}{
 		{
 			Vars:     "{}",

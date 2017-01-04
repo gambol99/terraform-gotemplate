@@ -37,10 +37,10 @@ func goDataSourceFile() *schema.Resource {
 				Optional:    true,
 				Description: "Contents of the template you wish rendered",
 			},
-			"snippits": {
+			"snippets": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The path to a directory containing snippits",
+				Description: "The path to a directory containing snippets",
 			},
 			"vars": {
 				Type:        schema.TypeMap,
@@ -71,7 +71,7 @@ func dataSourceFileRead(d *schema.ResourceData, meta interface{}) error {
 // renderGoTemplate is responsible for generating the template
 func renderGoTemplate(d *schema.ResourceData) (string, error) {
 	templateName := d.Get("template").(string)
-	snippitsPath := d.Get("snippits").(string)
+	snippetsPath := d.Get("snippets").(string)
 	vars := d.Get("vars").(map[string]interface{})
 
 	// step: read in the template content or file
@@ -85,15 +85,15 @@ func renderGoTemplate(d *schema.ResourceData) (string, error) {
 		return "", err
 	}
 	// step: load any snippits if required
-	if snippitsPath != "" {
+	if snippetsPath != "" {
 		// build a list of files under the directory
 		var files []string
-		dfiles, err := ioutil.ReadDir(snippitsPath)
+		dfiles, err := ioutil.ReadDir(snippetsPath)
 		if err != nil {
 			return "", err
 		}
 		for _, x := range dfiles {
-			files = append(files, fmt.Sprintf("%s/%s", strings.TrimRight(snippitsPath, "/"), x.Name()))
+			files = append(files, fmt.Sprintf("%s/%s", strings.TrimRight(snippetsPath, "/"), x.Name()))
 		}
 
 		// step: parse the snippit files and add to the template
@@ -131,6 +131,20 @@ func templateFuncs() template.FuncMap {
 		},
 		"empty": func(s string) bool {
 			return s == ""
+		},
+		"keys": func(m map[string]interface{}) []string {
+			var keys []string
+			for k := range m {
+				keys = append(keys, k)
+			}
+			return keys
+		},
+		"values": func(m map[string]interface{}) []interface{} {
+			var values []interface{}
+			for _, v := range m {
+				values = append(values, v)
+			}
+			return values
 		},
 	}
 }

@@ -1,11 +1,13 @@
-NAME=terraform-go-template
+NAME=gotemplate
 AUTHOR=gambol99
 ROOT_DIR=${PWD}
-GOVERSION=1.7.4
-GIT_SHA=$(shell git --no-pager describe --always --dirty)
 DEPS=$(shell go list -f '{{range .TestImports}}{{.}} {{end}}' ./...)
-PACKAGES=$(shell go list ./...)
+GIT_SHA=$(shell git --no-pager describe --always --dirty)
+GOVERSION=1.7.4
+HARDWARE=$(shell uname -m)
 LFLAGS ?= -X main.gitsha=${GIT_SHA}
+PACKAGES=$(shell go list ./...)
+VERSION=$(shell git describe --abbrev=0 --tags)
 VETARGS ?= -asmdecl -atomic -bool -buildtags -copylocks -methods -nilfunc -printf -rangeloops -shift -structtags -unsafeptr
 
 .PHONY: test authors lint cover vet
@@ -14,7 +16,7 @@ default: test
 
 clean:
 	@echo "--> Cleaning up"
-	@rm -rf bin
+	@rm -rf bin/ release/
 
 golang:
 	@echo "--> Go Version"
@@ -25,6 +27,11 @@ build: deps
 	@$(MAKE) golang
 	@mkdir -p bin/
 	@go build -o bin/gotemplate
+
+release: build
+	@echo "--> Performing a release"
+	mkdir -p release/
+	@gzip -c bin/${NAME} > release/${NAME}_${VERSION}_linux_${HARDWARE}.gz
 
 deps:
 	@echo "--> Installing build dependencies"
