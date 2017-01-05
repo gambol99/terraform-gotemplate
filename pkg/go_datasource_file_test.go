@@ -50,6 +50,16 @@ func TestGoTemplate(t *testing.T) {
 			Content:  "Hello {{ .name }}",
 			Expected: "Hello rohith",
 		},
+		{
+			Vars:     `{enabled=true}`,
+			Content:  "{{ if is_true .enabled }}is_true{{ end }}",
+			Expected: "is_true",
+		},
+		{
+			Vars:     `{enabled=false}`,
+			Content:  "{{ if is_true .enabled }}is_true{{ else }}is_false{{end}}",
+			Expected: "is_false",
+		},
 	}
 
 	for _, x := range cases {

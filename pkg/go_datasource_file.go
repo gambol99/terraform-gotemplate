@@ -140,13 +140,13 @@ func templateFuncs() template.FuncMap {
 			}
 			return keys
 		},
-		"true": func(s string) bool {
+		"is_true": func(s string) bool {
 			if s == "1" || s == "true" || s == "True" {
 				return true
 			}
 			return false
 		},
-		"false": func(s string) bool {
+		"is_false": func(s string) bool {
 			if s == "0" || s == "false" || s == "False" {
 				return false
 			}
