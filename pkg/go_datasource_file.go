@@ -80,13 +80,13 @@ func renderGoTemplate(d *schema.ResourceData) (string, error) {
 		return "", err
 	}
 	// step: load the main template
-	tmpl, err := template.New("main").Funcs(templateFuncs()).Parse(content)
+	tmpl, err := template.New("base").Funcs(templateFuncs()).Parse(content)
 	if err != nil {
 		return "", err
 	}
 	// step: load any snippits if required
-	var files []string
 	if snippetsPath != "" {
+		var files []string
 		// build a list of files under the directory
 		list, err := ioutil.ReadDir(snippetsPath)
 		if err != nil {
@@ -108,7 +108,7 @@ func renderGoTemplate(d *schema.ResourceData) (string, error) {
 
 	// step: render the template
 	rendered := new(bytes.Buffer)
-	if err := tmpl.ExecuteTemplate(rendered, "main", vars); err != nil {
+	if err := tmpl.ExecuteTemplate(rendered, "base", vars); err != nil {
 		return "", fmt.Errorf("unable to generate content, snippets: %d, error: %s", len(tmpl.Templates()), ",", err)
 	}
 
@@ -139,6 +139,18 @@ func templateFuncs() template.FuncMap {
 				keys = append(keys, k)
 			}
 			return keys
+		},
+		"true": func(s string) bool {
+			if s == "1" || s == "true" || s == "True" {
+				return true
+			}
+			return false
+		},
+		"false": func(s string) bool {
+			if s == "0" || s == "false" || s == "False" {
+				return false
+			}
+			return false
 		},
 		"values": func(m map[string]interface{}) []interface{} {
 			var values []interface{}
